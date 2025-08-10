@@ -1,34 +1,41 @@
 pipeline {
     agent any
 
+    environment {
+        EC2_USER = "ec2-user"
+        EC2_HOST = "54.235.17.48"
+        PEM_KEY = "/var/lib/jenkins/deploy-key.pem"
+        FRONTEND_DIR = "frontend"
+        BACKEND_DIR = "backend"
+    }
+
     stages {
-        stage('Backend Build') {
+        stage('Build Frontend') {
             steps {
-                sh 'cd backend && ./mvnw clean package -DskipTests'
+                dir(FRONTEND_DIR) {
+                    sh 'npm install'
+                    sh 'npm run build --prod'
+                }
             }
         }
 
-        stage('Frontend Build') {
+        stage('Build Backend') {
             steps {
-                sh 'cd frontend && npm install && npm run build'
+                dir(BACKEND_DIR) {
+                    sh './mvnw clean package -DskipTests'
+                }
             }
         }
 
-        stage('Deploy to Server') {
+        stage('Deploy to EC2') {
             steps {
-                // Deploy backend JAR to target EC2
-                sh '''
-                    scp -i /var/lib/jenkins/deploy-key.pem \
-                    backend/target/myapp.jar \
-                    ec2-user@54.235.17.48:/home/ec2-user/
-                '''
-
-                // Deploy frontend build to target EC2
-                sh '''
-                    scp -i /var/lib/jenkins/deploy-key.pem -r \
-                    frontend/dist/* \
-                    ec2-user@54.235.17.48:/var/www/html/
-                '''
+                sshagent (credentials: ['ec2-ssh-key']) {
+                    sh """
+                    scp -i ${PEM_KEY} -o StrictHostKeyChecking=no ${BACKEND_DIR}/target/*.jar ${EC2_USER}@${EC2_HOST}:/home/ec2-user/
+                    scp -i ${PEM_KEY} -o StrictHostKeyChecking=no -r ${FRONTEND_DIR}/dist/* ${EC2_USER}@${EC2_HOST}:/var/www/html/
+                    ssh -i ${PEM_KEY} -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} 'pkill -f "java -jar" || true && nohup java -jar /home/ec2-user/*.jar > app.log 2>&1 &'
+                    """
+                }
             }
         }
     }
