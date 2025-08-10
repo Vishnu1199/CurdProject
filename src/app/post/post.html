@@ -1,0 +1,55 @@
+<p>PostMapping works</p>
+
+  <form action="" (submit)="submitPost()">
+<input type="text" 
+ [(ngModel)]="newPost.name"
+placeholder="Name" name="name">
+<input type="text" 
+ [(ngModel)]="newPost.email"
+placeholder="Email" name="email">
+<input type="text" 
+ [(ngModel)]="newPost.username"
+placeholder="UserName" name="username">
+<input type="text" 
+ [(ngModel)]="newPost.password"
+placeholder="Password" name="password">
+<button type="submit">Create</button><br>
+
+</form>
+
+
+<button (click)="searchPost(newPost.name!)">Search</button>
+
+
+<p>GetMapping works</p>
+<ul *ngIf="posts.length>0" class="list-group">
+<li *ngFor="let post of posts" class="list-group-item">
+
+ <strong>{{post.id}}=> {{post.name}} , {{post.email}} , {{post.username}}</strong> - <button (click)="editPost(post.id)">Edit</button><button (click)="deletePost(post.id)">Delete</button>
+
+</li>
+
+
+</ul>
+<div *ngIf="errorcheck==true">
+
+<strong>{{errorMessage}}</strong>
+
+
+</div>
+
+<div *ngIf="check==true" class="list-group">
+    <ul >
+<input type="text" 
+ [(ngModel)]="newPostedit.name"
+placeholder="Name" name="name">
+<input type="text" 
+ [(ngModel)]="newPostedit.email"
+placeholder="Email" name="email">
+<input type="text" 
+ [(ngModel)]="newPostedit.username"
+placeholder="UserName" name="username">
+<button (click)="updatePost()">Update</button>
+</ul>
+</div>
+
