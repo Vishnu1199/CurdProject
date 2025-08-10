@@ -13,7 +13,7 @@ placeholder="UserName" name="username">
 <input type="text" 
  [(ngModel)]="newPost.password"
 placeholder="Password" name="password">
-<button type="submit">Create</button><br>
+<button type="submit">Add</button><br>
 
 </form>
 
@@ -39,7 +39,6 @@ placeholder="Password" name="password">
 </div>
 
 <div *ngIf="check==true" class="list-group">
-    <ul >
 <input type="text" 
  [(ngModel)]="newPostedit.name"
 placeholder="Name" name="name">
